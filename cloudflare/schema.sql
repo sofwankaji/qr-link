@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS links (
+  id TEXT PRIMARY KEY,
+  shortCode TEXT NOT NULL UNIQUE,
+  destinationUrl TEXT NOT NULL,
+  createdAt TEXT NOT NULL
+);

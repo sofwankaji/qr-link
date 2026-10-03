@@ -76,6 +76,13 @@ input[aria-invalid=true] { border-color: #a1272759; }
 .choices label.selected { background: transparent; box-shadow: none; }
 .choices label:hover { color: #1d1d1f; }
 .choices label:has(input:disabled) { opacity: .45; cursor: not-allowed; }
+.qr-design { border-top: 1px solid #1d1d1f0d; padding-top: 20px; margin: 0 0 24px; }
+.color-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; font-size: 12px; color: #6e6e73; }
+.color-row > div { display: flex; flex-wrap: wrap; gap: 4px; }
+.color-choice { display: flex; align-items: center; gap: 6px; min-height: 44px; border: 1px solid transparent; background: transparent; padding: 0 8px; border-radius: 10px; font-size: 11px; color: #6e6e73; }
+.color-choice span { width: 16px; height: 16px; border-radius: 50%; }
+.color-choice.active { border-color: #1d1d1f20; background: #ffffffb3; color: #1d1d1f; }
+.design-note { font-size: 10px; color: #6e6e73; margin: 8px 0 0; }
 .result-header [role=tablist] {
   position: relative;
   isolation: isolate;
@@ -113,6 +120,7 @@ input[aria-invalid=true] { border-color: #a1272759; }
   box-shadow: 0 8px 24px #1d1d1f07, 0 1px 3px #1d1d1f04;
   border-color: #1d1d1f0a;
 }
+.qr-wrap img { image-rendering: auto; }
 .empty-symbol { background: #ffffff40; border-color: #1d1d1f24; color: #93939b; }
 .preview-details, .download-controls, .mode-help, .action-text { animation: reveal 200ms var(--ease); }
 .success { animation: reveal 220ms var(--ease); }

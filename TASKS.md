@@ -266,6 +266,14 @@ Only mark a checkbox complete after implementation and verification.
 - [x] Re-test critical user flow against production output where practical.
 
 ## Final completion gate
+
+### User-requested QR appearance and Cloudflare extension
+- [ ] Verify Classic, Rounded, and Dots artwork in preview and exports.
+- [ ] Verify Graphite, Ocean, and Forest QR scan reliability.
+- [ ] Deploy Cloudflare Worker and initialize persistent D1 storage.
+- [ ] Connect GitHub Pages to the public Cloudflare API origin.
+- [ ] Verify online short URL redirects to its exact persisted destination.
+
 Do not declare V1 complete until verified:
 - [x] Original URL mode works end-to-end.
 - [ ] Short Link mode works end-to-end.

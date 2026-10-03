@@ -38,6 +38,24 @@ To connect an online backend, set the repository Actions variable `QR_API_ORIGIN
 
 ## Verification
 
+## Cloudflare Short Link backend
+
+The backend in `cloudflare/worker.js` uses Cloudflare Workers + D1. It returns public short URLs and redirects exact saved destinations. CORS allows the GitHub Pages origin only.
+
+1. Authenticate with `npx wrangler login --scopes account:read user:read workers:write d1:write`.
+2. Create a database with `npx wrangler d1 create qr-link-db`, then set its returned database ID in `wrangler.jsonc`.
+3. Initialize storage with `npx wrangler d1 execute qr-link-db --remote --file cloudflare/schema.sql`.
+4. Publish with `npx wrangler deploy`.
+5. Set the GitHub repository Actions variable `QR_API_ORIGIN` to the published Worker's HTTPS origin and rerun the Pages deployment.
+
+Wrangler authentication remains local and must never be committed. Custom domains are optional; the Worker's `workers.dev` address works for public short links. No Cloudflare deployment has been completed until authentication and the steps above succeed.
+
+## QR appearance
+
+Choose Classic, Rounded, or Dots and Graphite, Ocean, or Forest dark ink. Appearance updates the current result without creating another short link. Preview and download use the same design; exports retain a white background and four-module quiet zone. Rounded and Dots keep QR reserved patterns square and use H error correction. These new styles have not been scan-tested because testing was explicitly skipped at the user's request.
+
+## Verification commands
+
 ```sh
 npm run check
 npm test

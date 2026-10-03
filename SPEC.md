@@ -1,5 +1,9 @@
 # QR Link — Product Specification
 
+## User-approved extensions — 2026-10-03
+
+The user explicitly requested more playful generated QR artwork and Cloudflare hosting for online short links. This overrides the original V1 exclusion of QR colors/module shapes for these features only. Support Classic, Rounded, and Dots with curated dark Graphite, Ocean, and Forest inks, preserving white background and quiet zone. Keep preview/export appearance aligned. Use Cloudflare Workers + D1 for the GitHub Pages short-link backend.
+
 ## Product overview
 QR Link is a single-page utility that converts a URL into a QR code and can optionally create a Short Link.
 

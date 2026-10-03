@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { qrArtwork } from './qr.js';
+import { qrArtwork, qrColors } from './qr.js';
 import { normalizeUrl } from './url.js';
 import './style.css';
 import './glass.css';
@@ -24,9 +24,23 @@ function App() {
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [downloading, setDownloading] = useState(false);
+  const [design, setDesign] = useState({ shape: 'rounded', color: 'graphite' });
+  const [styling, setStyling] = useState(false);
+  const designRevision = useRef(0);
   const busy = useRef(false);
   const timer = useRef();
   useEffect(() => () => clearTimeout(timer.current), []);
+  async function changeDesign(next) {
+    const revision = ++designRevision.current;
+    setDesign(next); setFeedback('');
+    if (!result) return;
+    setStyling(true);
+    try {
+      const image = await qrArtwork(result.url, 'svg', 1024, next);
+      if (revision === designRevision.current) setResult(current => current?.url === result.url ? { ...current, image: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(image)}`, design: next } : current);
+    } catch { if (revision === designRevision.current) { setDesign(result.design); setFeedback('Could not apply this style. Try Classic.'); } }
+    finally { if (revision === designRevision.current) setStyling(false); }
+  }
   async function generate(event) {
     event.preventDefault();
     if (busy.current) return;
@@ -41,10 +55,11 @@ function App() {
         const response = await fetch(`${apiOrigin}/api/links`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: destination }) });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Unable to create your short link. Please try again.');
+        if (apiOrigin && !data.shortUrl) throw new Error('The short-link service did not return a public URL. Please try again.');
         url = data.shortUrl || `${window.location.origin}/${data.code}`;
       }
-      const image = await qrArtwork(url);
-      setResult({ url, image, mode }); setStatus('success'); setTab('preview');
+      const image = await qrArtwork(url, 'svg', 1024, design);
+      setResult({ url, image: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(image)}`, mode, design }); setStatus('success'); setTab('preview');
     } catch (failure) { setError(failure.message || 'Unable to generate QR. Please try again.'); setStatus('error'); }
     finally { busy.current = false; }
   }
@@ -55,7 +70,7 @@ function App() {
   async function download() {
     setDownloading(true); setFeedback('');
     try {
-      const data = await qrArtwork(result.url, format, size);
+      const data = await qrArtwork(result.url, format, size, result.design);
       const url = format === 'svg' ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(data)}` : data;
       const link = document.createElement('a'); link.href = url; link.download = `qr-link-${result.mode}${format === 'png' ? `-${size}` : ''}.${format}`; document.body.append(link); link.click(); link.remove();
     } catch { setFeedback('Unable to download the QR. Please try again.'); }
@@ -75,13 +90,14 @@ function App() {
           <p id="url-help" className={error ? 'helper error' : 'helper'} role={error ? 'alert' : undefined}>{error || 'No https://? We’ll add it for you.'}</p>
           <label className="input-label mode-label">Link mode</label><Choices label="Link mode" values={[[ 'original', 'Original URL' ], [ 'short', 'Short Link' ]]} value={mode} onChange={setMode} disabled={status === 'loading'} disabledValues={shortLinksAvailable ? [] : ['short']}/>
           <p key={mode} className="mode-help">{!shortLinksAvailable ? 'Original QR is ready. Short links are not available on this site yet.' : mode === 'original' ? 'Your QR opens the destination directly.' : 'A compact link that redirects to your destination.'}</p>
-          <button className="primary generate" disabled={status === 'loading'}>{status === 'loading' ? 'Generating…' : 'Generate QR'}<span aria-hidden="true">↗</span></button>
+          <div className="qr-design"><p className="input-label">Make it yours</p><Choices label="QR style" values={[[ 'classic', 'Classic' ], [ 'rounded', 'Rounded' ], [ 'dots', 'Dots' ]]} value={design.shape} onChange={shape => changeDesign({ ...design, shape })} disabled={status === 'loading' || downloading}/><div className="color-row"><span>Ink color</span><div role="group" aria-label="QR ink color">{Object.entries(qrColors).map(([color, hex]) => <button type="button" key={color} className={`color-choice ${design.color === color ? 'active' : ''}`} aria-label={color} aria-pressed={design.color === color} disabled={status === 'loading' || downloading} onClick={() => changeDesign({ ...design, color })}><span style={{ background: hex }} aria-hidden="true"/>{color.charAt(0).toUpperCase() + color.slice(1)}</button>)}</div></div><p className="design-note">Live preview · White background · Dark ink</p></div>
+          <button className="primary generate" disabled={status === 'loading' || styling}>{status === 'loading' ? 'Generating…' : 'Generate QR'}<span aria-hidden="true">↗</span></button>
         </form><div className="settings-foot"><span aria-hidden="true">✓</span> Clean, high-contrast QR. Ready to scan.</div>
       </section>
       <section className="panel result" data-state={status} aria-label="QR result" aria-busy={status === 'loading'}><div className="result-header"><div role="tablist" aria-label="Result view" style={{ '--selection': tab === 'preview' ? 0 : 1 }}>{['preview', 'download'].map(key => <button key={key} role="tab" id={`tab-${key}`} aria-controls="result-content" aria-selected={tab === key} tabIndex={tab === key ? 0 : -1} onKeyDown={tabKey} onClick={() => { setTab(key); setFeedback(''); }} className={tab === key ? 'active' : ''}>{key === 'preview' ? 'Preview' : 'Download'}</button>)}</div><span className="result-label">{result ? <><span className="ready-dot" aria-hidden="true"/>READY TO SCAN</> : 'YOUR QR CODE'}</span></div>
         <div id="result-content" role="tabpanel" aria-labelledby={`tab-${tab}`} tabIndex={0}>
           {status !== 'success' ? <div className="empty"><div className={`empty-symbol ${status === 'loading' ? 'loading' : ''}`} aria-hidden="true">{status === 'loading' ? '◌' : '▦'}</div><h3>{status === 'loading' ? 'Creating your QR code…' : status === 'error' ? 'Let’s try that link again.' : 'Your QR code will appear here.'}</h3><p>{status === 'error' ? 'Check the URL and generate again.' : status === 'loading' ? 'Just a moment. Your link is on its way.' : 'Paste a link and generate your first QR code.'}</p></div> : <div className="success"><div className="qr-wrap"><img src={result.image} alt={`QR code for ${result.url}`} width="300" height="300"/></div>
-            {tab === 'preview' ? <div key="preview" className="preview-details"><p className="encoded-label">{result.mode === 'short' ? 'YOUR SHORT LINK' : 'DESTINATION URL'}</p><p className="encoded-url" title={result.url}>{result.url}</p><div className="preview-actions"><button className={`secondary ${copied ? 'is-copied' : ''}`} onClick={copy}><span key={String(copied)} className="action-text">{copied ? 'Copied' : 'Copy Link'}</span><span className="action-icon" aria-hidden="true">{copied ? '✓' : '⧉'}</span></button><a className="secondary" href={result.url} target="_blank" rel="noopener noreferrer">Open<span className="action-icon" aria-hidden="true">↗</span></a></div></div> : <div key="download" className="download-controls"><div className="download-row"><div><p className="input-label">Format</p><Choices label="Download format" values={[[ 'png', 'PNG' ], [ 'svg', 'SVG' ]]} value={format} onChange={setFormat}/></div>{format === 'png' ? <div><label className="input-label" htmlFor="size">Image size</label><select id="size" value={size} onChange={event => setSize(event.target.value)}>{['512', '1024', '2048'].map(s => <option key={s} value={s}>{s} × {s}</option>)}</select></div> : <p className="vector-note">Vector artwork.<br/>Sharp at every size.</p>}</div><button className="primary" onClick={download} disabled={downloading}>{downloading ? 'Downloading…' : 'Download QR'}<span aria-hidden="true">↓</span></button></div>}
+            {tab === 'preview' ? <div key="preview" className="preview-details"><p className="encoded-label">{result.mode === 'short' ? 'YOUR SHORT LINK' : 'DESTINATION URL'}</p><p className="encoded-url" title={result.url}>{result.url}</p><div className="preview-actions"><button className={`secondary ${copied ? 'is-copied' : ''}`} onClick={copy}><span key={String(copied)} className="action-text">{copied ? 'Copied' : 'Copy Link'}</span><span className="action-icon" aria-hidden="true">{copied ? '✓' : '⧉'}</span></button><a className="secondary" href={result.url} target="_blank" rel="noopener noreferrer">Open<span className="action-icon" aria-hidden="true">↗</span></a></div></div> : <div key="download" className="download-controls"><div className="download-row"><div><p className="input-label">Format</p><Choices label="Download format" values={[[ 'png', 'PNG' ], [ 'svg', 'SVG' ]]} value={format} onChange={setFormat}/></div>{format === 'png' ? <div><label className="input-label" htmlFor="size">Image size</label><select id="size" value={size} onChange={event => setSize(event.target.value)}>{['512', '1024', '2048'].map(s => <option key={s} value={s}>{s} × {s}</option>)}</select></div> : <p className="vector-note">Vector artwork.<br/>Sharp at every size.</p>}</div><button className="primary" onClick={download} disabled={downloading || styling}>{downloading ? 'Downloading…' : 'Download QR'}<span aria-hidden="true">↓</span></button></div>}
           </div>}
         </div><p className="feedback" role="status" aria-live="polite">{feedback || (copied ? 'Link copied to clipboard.' : '')}</p>
       </section>
@@ -89,3 +105,4 @@ function App() {
   </main>;
 }
 createRoot(document.getElementById('root')).render(<App/>);
+

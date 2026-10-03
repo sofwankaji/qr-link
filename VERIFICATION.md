@@ -1,5 +1,7 @@
 # Verification — 2026-10-03
 
+Latest changes: generated QR now supports shapes and dark ink colors; Cloudflare Workers/D1 backend source is prepared. Production build passed. No tests or scanning checks were run for these changes, following the user's instruction to skip testing. Cloudflare publishing awaits account authentication. Earlier verification below applies to the original implementation and does not confirm the new QR styles or Cloudflare backend.
+
 ## Implemented
 
 React single-page tool with Original and Short Link modes, inline validation, generation states, Preview/Download tabs, clipboard feedback, safe Open anchor, PNG/SVG export, keyboard interaction, and responsive neutral glass styling. Express stores validated destinations in SQLite, generates random seven-character codes with a unique database constraint and collision retries, and redirects server-side.
