@@ -6,3 +6,6 @@ test-results
 .env
 .env.*
 *.log
+.wrangler
+.dev.vars
+.dev.vars.*

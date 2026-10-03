@@ -36,8 +36,6 @@ The GitHub Pages workflow publishes the frontend at https://sofwankaji.github.io
 
 To connect an online backend, set the repository Actions variable `QR_API_ORIGIN` to its HTTPS origin, configure the backend's `PUBLIC_BASE_URL`, allow this Pages origin through its CORS settings, and rerun the Pages deployment. Deploy the backend separately with persistent storage; no localhost fallback is used by the Pages Short Link interface.
 
-## Verification
-
 ## Cloudflare Short Link backend
 
 The backend in `cloudflare/worker.js` uses Cloudflare Workers + D1. It returns public short URLs and redirects exact saved destinations. CORS allows the GitHub Pages origin only.
@@ -48,7 +46,7 @@ The backend in `cloudflare/worker.js` uses Cloudflare Workers + D1. It returns p
 4. Publish with `npx wrangler deploy`.
 5. Set the GitHub repository Actions variable `QR_API_ORIGIN` to the published Worker's HTTPS origin and rerun the Pages deployment.
 
-Wrangler authentication remains local and must never be committed. Custom domains are optional; the Worker's `workers.dev` address works for public short links. No Cloudflare deployment has been completed until authentication and the steps above succeed.
+Wrangler authentication remains local and must never be committed. Custom domains are optional; the Worker's `workers.dev` address works for public short links. The D1 database and schema are created. Worker publishing is pending the Cloudflare OAuth permission for script deployment; no online Short Link is active until the Worker is published and Pages is rebuilt with its origin.
 
 ## QR appearance
 

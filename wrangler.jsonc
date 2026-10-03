@@ -9,7 +9,7 @@
     {
       "binding": "DB",
       "database_name": "qr-link-db",
-      "database_id": "REPLACE_WITH_CLOUDFLARE_D1_DATABASE_ID"
+      "database_id": "267afa1c-25b1-44b5-bcc4-8e66d9607d08"
     }
   ]
 }
