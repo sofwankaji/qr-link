@@ -1,0 +1,32 @@
+{
+  "name": "projecta",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test tests/url.test.js tests/qr.test.js",
+    "dev": "node server.js",
+    "build": "vite build",
+    "start": "node server-production.js",
+    "check": "node --check server.js",
+    "test:server": "node --test tests/server.test.js",
+    "test:e2e": "node tests/e2e.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "express": "^5.2.1",
+    "qrcode": "^1.5.4",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "jsqr": "^1.4.0",
+    "playwright": "^1.63.0",
+    "pngjs": "^7.0.0",
+    "sharp": "^0.35.5",
+    "vite": "^8.3.2"
+  }
+}
