@@ -5,8 +5,12 @@ import { normalizeUrl } from './url.js';
 import './style.css';
 import './glass.css';
 
-function Choices({ label, values, value, onChange, disabled }) {
-  return <fieldset className="choices" style={{ '--selection': values.findIndex(([key]) => key === value), '--count': values.length }} disabled={disabled}><legend className="sr-only">{label}</legend>{values.map(([key, title]) => <label key={key} className={value === key ? 'selected' : ''}><input type="radio" name={label} value={key} checked={value === key} onChange={() => onChange(key)}/><span>{title}</span></label>)}</fieldset>;
+const staticHosting = import.meta.env.VITE_STATIC_HOSTING === 'true';
+const apiOrigin = (import.meta.env.VITE_API_ORIGIN || '').replace(/\/$/, '');
+const shortLinksAvailable = !staticHosting || Boolean(apiOrigin);
+
+function Choices({ label, values, value, onChange, disabled, disabledValues = [] }) {
+  return <fieldset className="choices" style={{ '--selection': values.findIndex(([key]) => key === value), '--count': values.length }} disabled={disabled}><legend className="sr-only">{label}</legend>{values.map(([key, title]) => <label key={key} className={value === key ? 'selected' : ''}><input type="radio" name={label} value={key} checked={value === key} disabled={disabledValues.includes(key)} onChange={() => onChange(key)}/><span>{title}</span></label>)}</fieldset>;
 }
 function App() {
   const [input, setInput] = useState('');
@@ -33,7 +37,8 @@ function App() {
       setStatus('loading');
       let url = destination;
       if (mode === 'short') {
-        const response = await fetch('/api/links', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: destination }) });
+        if (!shortLinksAvailable) throw new Error('Short links are not available on this site yet.');
+        const response = await fetch(`${apiOrigin}/api/links`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: destination }) });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Unable to create your short link. Please try again.');
         url = data.shortUrl || `${window.location.origin}/${data.code}`;
@@ -62,14 +67,14 @@ function App() {
     }
   }
   return <main className="shell">
-    <header><a className="wordmark" href="/" aria-label="QR Link home"><span className="brand-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h3v3h-3zM18 18h3v3h-3zM12 3v3M3 12h3M12 12h3M21 12v3M12 18v3"/></svg></span>QR Link</a><span className="header-note">A little link. A lot of possibility.</span></header>
+    <header><a className="wordmark" href={import.meta.env.BASE_URL} aria-label="QR Link home"><span className="brand-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h3v3h-3zM18 18h3v3h-3zM12 3v3M3 12h3M12 12h3M21 12v3M12 18v3"/></svg></span>QR Link</a><span className="header-note">A little link. A lot of possibility.</span></header>
     <section className="intro"><p className="eyebrow">LINKS, MADE SCANNABLE</p><h1>Create a QR code<br className="mobile-break"/> from any link.</h1><p>Paste a URL, generate a QR code, and shorten it if you want.</p></section>
     <div className="tool">
       <section className="panel settings" aria-labelledby="settings-title"><div className="panel-top"><span className="step">01</span><h2 id="settings-title">Create QR</h2></div><p className="panel-description">Your next connection starts with a link.</p>
         <form onSubmit={generate} noValidate><label className="input-label" htmlFor="destination">Destination URL</label><input id="destination" type="text" inputMode="url" autoComplete="url" autoCapitalize="none" spellCheck="false" placeholder="https://example.com" value={input} onChange={event => setInput(event.target.value)} aria-describedby="url-help" aria-invalid={status === 'error'} disabled={status === 'loading'}/>
           <p id="url-help" className={error ? 'helper error' : 'helper'} role={error ? 'alert' : undefined}>{error || 'No https://? We’ll add it for you.'}</p>
-          <label className="input-label mode-label">Link mode</label><Choices label="Link mode" values={[[ 'original', 'Original URL' ], [ 'short', 'Short Link' ]]} value={mode} onChange={setMode} disabled={status === 'loading'}/>
-          <p key={mode} className="mode-help">{mode === 'original' ? 'Your QR opens the destination directly.' : 'A compact link that redirects to your destination.'}</p>
+          <label className="input-label mode-label">Link mode</label><Choices label="Link mode" values={[[ 'original', 'Original URL' ], [ 'short', 'Short Link' ]]} value={mode} onChange={setMode} disabled={status === 'loading'} disabledValues={shortLinksAvailable ? [] : ['short']}/>
+          <p key={mode} className="mode-help">{!shortLinksAvailable ? 'Original QR is ready. Short links are not available on this site yet.' : mode === 'original' ? 'Your QR opens the destination directly.' : 'A compact link that redirects to your destination.'}</p>
           <button className="primary generate" disabled={status === 'loading'}>{status === 'loading' ? 'Generating…' : 'Generate QR'}<span aria-hidden="true">↗</span></button>
         </form><div className="settings-foot"><span aria-hidden="true">✓</span> Clean, high-contrast QR. Ready to scan.</div>
       </section>

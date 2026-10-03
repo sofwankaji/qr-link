@@ -75,6 +75,7 @@ input[aria-invalid=true] { border-color: #a1272759; }
 .choices label { transition: color 180ms var(--ease); }
 .choices label.selected { background: transparent; box-shadow: none; }
 .choices label:hover { color: #1d1d1f; }
+.choices label:has(input:disabled) { opacity: .45; cursor: not-allowed; }
 .result-header [role=tablist] {
   position: relative;
   isolation: isolate;

@@ -30,7 +30,11 @@ The optional `render.yaml` creates a Node 24 service with a persistent disk at `
 
 For another host, use the included Dockerfile, mount persistent storage at `/app/data`, configure `PUBLIC_BASE_URL`, and place the service behind HTTPS. Source changes on GitHub run a production build through the included workflow; hosting deployment is configured separately.
 
-Source repository: https://github.com/sofwankaji/qr-link (private). The online application has not been deployed yet; choose and connect a hosting destination to finish publishing.
+Source repository: https://github.com/sofwankaji/qr-link (public).
+
+The GitHub Pages workflow publishes the frontend at https://sofwankaji.github.io/qr-link/. Original URL QR generation runs entirely in the browser. Short Link is explicitly unavailable on Pages until an online backend is connected; Pages cannot run Express or SQLite. The full server application still supports Short Link.
+
+To connect an online backend, set the repository Actions variable `QR_API_ORIGIN` to its HTTPS origin, configure the backend's `PUBLIC_BASE_URL`, allow this Pages origin through its CORS settings, and rerun the Pages deployment. Deploy the backend separately with persistent storage; no localhost fallback is used by the Pages Short Link interface.
 
 ## Verification
 
