@@ -6,7 +6,7 @@ import jsQR from 'jsqr';
 import sharp from 'sharp';
 import { qrArtwork } from '../src/qr.js';
 
-const urls = ['https://example.com', 'https://example.com/test?a=1#demo', 'http://localhost:3000/Z2dfVLo'];
+const urls = ['https://example.com', 'https://example.com/test?a=1#demo', 'https://example.org/cat'];
 function decode(bytes, expected, size) {
   const png = PNG.sync.read(bytes);
   assert.equal(png.width, size); assert.equal(png.height, size);
@@ -29,3 +29,4 @@ for (const url of urls) {
     if (url === urls[1]) await writeFile('test-results/artwork.svg', artwork);
   });
 }
+

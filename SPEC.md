@@ -1,5 +1,11 @@
 # QR Link — Product Specification
 
+## Current user override — 2026-10-03
+
+Short Link is removed entirely. References below to shortening, persistence, redirects, link modes, and backend/database requirements are retired. Current flow: Paste URL → Choose QR appearance → Generate → Preview/Copy/Open/Download. QR encodes the normalized destination directly. GitHub Pages hosts the full product without backend services.
+
+Cat is the default appearance alongside Classic, Rounded, and Dots. Cartoon ears, whiskers, blush, and paws stay outside the full white quiet zone. Cat uses standard square modules and H error correction. Preview and PNG/SVG exports retain identical appearance and exact square PNG sizes. No decoration covers encoded modules. The user requested no tests; report build/deployment status without claiming Cat has been scan-verified.
+
 ## User-approved extensions — 2026-10-03
 
 The user explicitly requested more playful generated QR artwork and Cloudflare hosting for online short links. This overrides the original V1 exclusion of QR colors/module shapes for these features only. Support Classic, Rounded, and Dots with curated dark Graphite, Ocean, and Forest inks, preserving white background and quiet zone. Keep preview/export appearance aligned. Use Cloudflare Workers + D1 for the GitHub Pages short-link backend.

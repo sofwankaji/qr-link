@@ -8,9 +8,7 @@
     "dev": "node server.js",
     "build": "vite build",
     "start": "node server-production.js",
-    "check": "node --check server.js",
-    "test:server": "node --test tests/server.test.js",
-    "test:e2e": "node tests/e2e.js"
+    "check": "node --check server.js"
   },
   "keywords": [],
   "author": "",
@@ -27,7 +25,6 @@
     "playwright": "^1.63.0",
     "pngjs": "^7.0.0",
     "sharp": "^0.35.5",
-    "vite": "^8.3.2",
-    "wrangler": "^4.147.0"
+    "vite": "^8.3.2"
   }
 }
